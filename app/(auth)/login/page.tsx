@@ -47,7 +47,9 @@ export default function LoginPage() {
       console.log('✅ ログイン成功、リダイレクト中...')
 
       // 成功メッセージを表示して手動でリダイレクト
-      const userConfirm = confirm('ログイン成功！ダッシュボードに移動しますか？')
+      const userConfirm = confirm(
+        'ログイン成功！ダッシュボードに移動しますか？',
+      )
       if (userConfirm) {
         // 複数の方法でリダイレクトを試行
         try {

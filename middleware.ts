@@ -20,26 +20,31 @@ function getClientIP(request: NextRequest): string {
 
 export async function middleware(request: NextRequest) {
   // 開発環境とVercelプレビュー環境では重い処理をスキップ
-  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') {
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.VERCEL_ENV === 'preview'
+  ) {
     const response = NextResponse.next()
-    
+
     // 必要最小限のセキュリティヘッダーのみ追加
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('X-Content-Type-Options', 'nosniff')
-    
+
     // 保護されたパスのチェック（簡略化）
     const pathname = request.nextUrl.pathname
-    if (pathname.startsWith('/dashboard') || 
-        pathname.startsWith('/profile') || 
-        pathname.startsWith('/workouts/new') || 
-        pathname.startsWith('/posts/new')) {
+    if (
+      pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/profile') ||
+      pathname.startsWith('/workouts/new') ||
+      pathname.startsWith('/posts/new')
+    ) {
       // 開発環境では認証チェックをスキップ
       console.log('🎯 Dev mode: Auth check skipped for', pathname)
     }
-    
+
     return response
   }
-  
+
   // 以下は本番環境のみで実行
   const startTime = Date.now()
   const requestId = Math.random().toString(36).substr(2, 9)
@@ -124,7 +129,7 @@ export async function middleware(request: NextRequest) {
   if (isProtectedPath) {
     // デモモード: 認証チェックを無効化
     console.log('🔒 Protected path accessed:', request.nextUrl.pathname)
-    
+
     // 開発環境では認証チェックをスキップ
     if (process.env.NODE_ENV === 'development') {
       console.log('🎯 Development mode: Skipping auth check')
