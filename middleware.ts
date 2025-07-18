@@ -131,7 +131,7 @@ export async function middleware(request: NextRequest) {
     console.log('🔒 Protected path accessed:', request.nextUrl.pathname)
 
     // 開発環境では認証チェックをスキップ
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       console.log('🎯 Development mode: Skipping auth check')
       // 認証チェックをスキップ
     } else {
