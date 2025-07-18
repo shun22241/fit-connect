@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateCoachingAdvice } from '@/lib/openai'
-import { prisma } from '@/lib/prisma'
+// import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
