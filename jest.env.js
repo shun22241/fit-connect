@@ -1,0 +1,16 @@
+// Jest 環境変数設定
+process.env.NODE_ENV = 'test'
+process.env.NEXTAUTH_SECRET = 'test-secret'
+process.env.NEXTAUTH_URL = 'http://localhost:3000'
+process.env.DATABASE_URL =
+  'postgresql://postgres:postgres@localhost:5432/fitconnect_test'
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
+process.env.OPENAI_API_KEY = 'test-openai-key'
+process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = 'test-vapid-public-key'
+process.env.VAPID_PRIVATE_KEY = 'test-vapid-private-key'
+process.env.REDIS_URL = 'redis://localhost:6379'
+process.env.RATE_LIMIT_ENABLED = 'false'
+process.env.LOG_LEVEL = 'error'
+process.env.NEXT_PUBLIC_DEBUG_MODE = 'true'

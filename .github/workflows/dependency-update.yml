@@ -1,0 +1,97 @@
+name: 🔄 Dependency Updates
+
+on:
+  schedule:
+    # 毎週月曜日の午前9時に実行 (JST)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: 🔄 Update Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 🔍 Check for updates
+        run: |
+          npm outdated || true
+          npm audit || true
+
+      - name: 📦 Update patch and minor versions
+        run: |
+          npm update
+          npm audit fix
+
+      - name: 🧪 Run tests
+        run: |
+          npm ci
+          npm run test
+
+      - name: 📝 Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: '🔄 Update dependencies'
+          title: '🔄 Automated dependency updates'
+          body: |
+            ## 🔄 Automated Dependency Updates
+
+            This PR contains automated updates to package dependencies.
+
+            ### Changes:
+            - Updated patch and minor versions
+            - Applied security fixes
+
+            ### Testing:
+            - ✅ All tests pass
+            - ✅ Build successful
+
+            Please review and merge if appropriate.
+          branch: automated-dependency-updates
+          delete-branch: true
+
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔒 Run security audit
+        run: |
+          npm audit
+          npm audit --audit-level=moderate
+
+      - name: 🛡️ Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📊 Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'

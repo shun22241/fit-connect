@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザー情報
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  username       String?        @unique
+  avatarUrl      String?
+  bio            String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  workouts       Workout[]
+  posts          Post[]
+  likes          Like[]
+  comments       Comment[]
+  following      Follow[]       @relation("Following")
+  followers      Follow[]       @relation("Followers")
+
+  @@index([email])
+  @@index([username])
+}
+
+// ワークアウト記録
+model Workout {
+  id             String         @id @default(cuid())
+  userId         String
+  name           String
+  notes          String?
+  duration       Int?           // 分単位
+  completedAt    DateTime       @default(now())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises      Exercise[]
+  posts          Post[]
+
+  @@index([userId])
+  @@index([completedAt])
+}
+
+// エクササイズ詳細
+model Exercise {
+  id             String         @id @default(cuid())
+  workoutId      String
+  exerciseName   String
+  sets           Int
+  reps           Int[]
+  weights        Float[]
+  restSeconds    Int[]
+  order          Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  workout        Workout        @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@index([workoutId])
+}
+
+// 投稿
+model Post {
+  id             String         @id @default(cuid())
+  userId         String
+  content        String
+  imageUrl       String?
+  workoutId      String?
+  hashtags       String[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workout        Workout?       @relation(fields: [workoutId], references: [id], onDelete: SetNull)
+  likes          Like[]
+  comments       Comment[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([hashtags])
+}
+
+// いいね
+model Like {
+  id             String         @id @default(cuid())
+  userId         String
+  postId         String
+  createdAt      DateTime       @default(now())
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post           Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@index([userId])
+}
+
+// コメント
+model Comment {
+  id             String         @id @default(cuid())
+  userId         String
+  postId         String
+  content        String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post           Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([userId])
+}
+
+// フォロー
+model Follow {
+  id             String         @id @default(cuid())
+  followerId     String
+  followingId    String
+  createdAt      DateTime       @default(now())
+
+  // Relations
+  follower       User           @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following      User           @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}

@@ -1,0 +1,23 @@
+# 開発用 Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 開発用パッケージをインストール
+RUN apk add --no-cache libc6-compat git
+
+# package.json をコピーして依存関係をインストール
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# アプリケーションコードをコピー
+COPY . .
+
+# Prisma クライアントを生成
+RUN npx prisma generate
+
+# 開発サーバーのポートを公開
+EXPOSE 3000
+
+# 開発サーバーを起動
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,55 @@
+name: 🚨 Lighthouse Performance Audit
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    # 毎日午前2時に実行 (JST)
+    - cron: '0 17 * * *'
+
+jobs:
+  lighthouse:
+    name: 🚨 Lighthouse Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build application
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: 🚀 Start application
+        run: |
+          npm start &
+          sleep 30
+        env:
+          PORT: 3000
+
+      - name: 🚨 Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: 📊 Upload Lighthouse reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-reports
+          path: |
+            .lighthouseci
+          retention-days: 30

@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* モバイル対応の改善 */
+@layer utilities {
+  /* タッチターゲットサイズの最低44px確保 */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* モバイルでのフォントサイズ調整 */
+  .mobile-text {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+
+  /* スクロールバーのスタイリング */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* プルリフレッシュのためのオーバースクロール無効化 */
+  .no-overscroll {
+    overscroll-behavior: none;
+  }
+
+  /* モバイルでのホバー効果無効化 */
+  @media (hover: none) {
+    .hover\:bg-gray-100:hover {
+      background-color: inherit;
+    }
+
+    .hover\:scale-105:hover {
+      transform: none;
+    }
+  }
+}
+
+/* モバイル専用のスタイル */
+@media (max-width: 768px) {
+  /* カードの余白調整 */
+  .mobile-card {
+    margin: 0.5rem;
+    border-radius: 0.75rem;
+  }
+
+  /* ボタンサイズの調整 */
+  .mobile-button {
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+  }
+
+  /* 入力フィールドの調整 */
+  .mobile-input {
+    padding: 0.75rem;
+    font-size: 16px; /* iOSでのズーム防止 */
+  }
+
+  /* ナビゲーションの調整 */
+  .mobile-nav-item {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+  }
+}
+
+/* 高解像度画面対応 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* アニメーション設定 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
