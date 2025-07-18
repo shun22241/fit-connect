@@ -10,14 +10,19 @@ const vapidKeys = {
 }
 
 // VAPID キーが設定されている場合のみ初期化
-if (vapidKeys.publicKey && vapidKeys.privateKey) {
-  webpush.setVapidDetails(
-    vapidKeys.subject,
-    vapidKeys.publicKey,
-    vapidKeys.privateKey,
-  )
-} else {
-  console.warn('VAPID keys not configured - push notifications will not work')
+try {
+  if (vapidKeys.publicKey && vapidKeys.privateKey) {
+    webpush.setVapidDetails(
+      vapidKeys.subject,
+      vapidKeys.publicKey,
+      vapidKeys.privateKey,
+    )
+  } else {
+    console.warn('VAPID keys not configured - push notifications will not work')
+  }
+} catch (error) {
+  console.warn('VAPID setup failed:', error)
+  // VAPIDエラーが発生してもアプリケーションは継続
 }
 
 // プッシュ通知を送信
