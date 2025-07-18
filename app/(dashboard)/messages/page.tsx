@@ -155,7 +155,7 @@ export default function MessagesPage() {
     if (selectedConversation) {
       setMessages(mockMessages)
     }
-  }, [selectedConversation])
+  }, [selectedConversation, mockConversations, mockMessages])
 
   useEffect(() => {
     scrollToBottom()

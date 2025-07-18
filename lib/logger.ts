@@ -1,5 +1,5 @@
-import { createWriteStream, existsSync, mkdirSync } from 'fs'
-import { join } from 'path'
+// Edge Runtime compatible logger
+// Note: File system operations are not available in Edge Runtime
 
 // ログレベルの定義
 export enum LogLevel {
@@ -19,22 +19,13 @@ interface LogEntry {
   requestId?: string
 }
 
-class Logger {
+class EdgeLogger {
   private logLevel: LogLevel
   private logToConsole: boolean
-  private logToFile: boolean
-  private logDirectory: string
-  private logFileStream?: NodeJS.WritableStream
 
   constructor() {
     this.logLevel = this.parseLogLevel(process.env.LOG_LEVEL || 'info')
     this.logToConsole = process.env.LOG_TO_CONSOLE !== 'false'
-    this.logToFile = process.env.LOG_TO_FILE === 'true'
-    this.logDirectory = process.env.LOG_DIRECTORY || './logs'
-
-    if (this.logToFile) {
-      this.initializeFileLogging()
-    }
   }
 
   private parseLogLevel(level: string): LogLevel {
@@ -52,22 +43,6 @@ class Logger {
     }
   }
 
-  private initializeFileLogging() {
-    try {
-      if (!existsSync(this.logDirectory)) {
-        mkdirSync(this.logDirectory, { recursive: true })
-      }
-
-      const logFileName = `app-${new Date().toISOString().split('T')[0]}.log`
-      const logFilePath = join(this.logDirectory, logFileName)
-
-      this.logFileStream = createWriteStream(logFilePath, { flags: 'a' })
-    } catch (error) {
-      console.error('Failed to initialize file logging:', error)
-      this.logToFile = false
-    }
-  }
-
   private shouldLog(level: LogLevel): boolean {
     return level <= this.logLevel
   }
@@ -78,31 +53,24 @@ class Logger {
     const userId = entry.userId ? ` [User: ${entry.userId}]` : ''
     const requestId = entry.requestId ? ` [Request: ${entry.requestId}]` : ''
 
-    return `${entry.timestamp} [${entry.level}]${userId}${requestId} ${entry.message}${context}${error}`
+    return `[${entry.timestamp}] ${entry.level.toUpperCase()}${userId}${requestId}: ${entry.message}${context}${error}`
   }
 
-  private log(
-    level: LogLevel,
-    levelName: string,
-    message: string,
-    context?: Record<string, any>,
-    error?: Error,
-  ) {
-    if (!this.shouldLog(level)) {
-      return
-    }
+  private log(level: LogLevel, message: string, context?: Record<string, any>, error?: Error, userId?: string, requestId?: string) {
+    if (!this.shouldLog(level)) return
 
-    const logEntry: LogEntry = {
+    const entry: LogEntry = {
       timestamp: new Date().toISOString(),
-      level: levelName,
+      level: LogLevel[level].toLowerCase(),
       message,
       context,
       error,
+      userId,
+      requestId,
     }
 
-    const formattedLog = this.formatLogEntry(logEntry)
+    const formattedLog = this.formatLogEntry(entry)
 
-    // コンソール出力
     if (this.logToConsole) {
       switch (level) {
         case LogLevel.ERROR:
@@ -120,202 +88,25 @@ class Logger {
       }
     }
 
-    // ファイル出力
-    if (this.logToFile && this.logFileStream) {
-      this.logFileStream.write(formattedLog + '\n')
-    }
+    // In Edge Runtime, we can only log to console or send to external services
+    // File logging is not available
   }
 
-  // パブリックメソッド
-  error(message: string, context?: Record<string, any>, error?: Error) {
-    this.log(LogLevel.ERROR, 'ERROR', message, context, error)
+  error(message: string, error?: Error, context?: Record<string, any>, userId?: string, requestId?: string) {
+    this.log(LogLevel.ERROR, message, context, error, userId, requestId)
   }
 
-  warn(message: string, context?: Record<string, any>) {
-    this.log(LogLevel.WARN, 'WARN', message, context)
+  warn(message: string, context?: Record<string, any>, userId?: string, requestId?: string) {
+    this.log(LogLevel.WARN, message, context, undefined, userId, requestId)
   }
 
-  info(message: string, context?: Record<string, any>) {
-    this.log(LogLevel.INFO, 'INFO', message, context)
+  info(message: string, context?: Record<string, any>, userId?: string, requestId?: string) {
+    this.log(LogLevel.INFO, message, context, undefined, userId, requestId)
   }
 
-  debug(message: string, context?: Record<string, any>) {
-    this.log(LogLevel.DEBUG, 'DEBUG', message, context)
-  }
-
-  // リクエスト固有のロガーを作成
-  child(options: { userId?: string; requestId?: string }): ChildLogger {
-    return new ChildLogger(this, options)
-  }
-
-  // ファイルストリームのクローズ
-  close() {
-    if (this.logFileStream) {
-      this.logFileStream.end()
-    }
+  debug(message: string, context?: Record<string, any>, userId?: string, requestId?: string) {
+    this.log(LogLevel.DEBUG, message, context, undefined, userId, requestId)
   }
 }
 
-class ChildLogger {
-  constructor(
-    private parent: Logger,
-    private options: { userId?: string; requestId?: string },
-  ) {}
-
-  error(message: string, context?: Record<string, any>, error?: Error) {
-    this.parent.error(
-      this.formatMessage(message),
-      { ...context, ...this.options },
-      error,
-    )
-  }
-
-  warn(message: string, context?: Record<string, any>) {
-    this.parent.warn(this.formatMessage(message), {
-      ...context,
-      ...this.options,
-    })
-  }
-
-  info(message: string, context?: Record<string, any>) {
-    this.parent.info(this.formatMessage(message), {
-      ...context,
-      ...this.options,
-    })
-  }
-
-  debug(message: string, context?: Record<string, any>) {
-    this.parent.debug(this.formatMessage(message), {
-      ...context,
-      ...this.options,
-    })
-  }
-
-  private formatMessage(message: string): string {
-    const prefix: string[] = []
-    if (this.options.userId) prefix.push(`User:${this.options.userId}`)
-    if (this.options.requestId) prefix.push(`Request:${this.options.requestId}`)
-    return prefix.length > 0 ? `[${prefix.join(', ')}] ${message}` : message
-  }
-}
-
-// シングルトンインスタンス
-export const logger = new Logger()
-
-// Express ミドルウェア用のリクエストロガー
-export function createRequestLogger(req: any, res: any, next: any) {
-  const requestId = Math.random().toString(36).substr(2, 9)
-  const userId = req.user?.id || 'anonymous'
-
-  const requestLogger = logger.child({ userId, requestId })
-
-  requestLogger.info('Request started', {
-    method: req.method,
-    url: req.url,
-    userAgent: req.get('User-Agent'),
-    ip: req.ip,
-  })
-
-  const startTime = Date.now()
-
-  res.on('finish', () => {
-    const duration = Date.now() - startTime
-    const statusCode = res.statusCode
-
-    const logMethod =
-      statusCode >= 400 ? 'error' : statusCode >= 300 ? 'warn' : 'info'
-
-    requestLogger[logMethod]('Request completed', {
-      statusCode,
-      duration: `${duration}ms`,
-      contentLength: res.get('Content-Length'),
-    })
-  })
-
-  // リクエストオブジェクトにロガーを追加
-  req.logger = requestLogger
-  next()
-}
-
-// パフォーマンス測定用のデコレーター
-export function logPerformance(
-  target: any,
-  propertyName: string,
-  descriptor: PropertyDescriptor,
-) {
-  const method = descriptor.value
-
-  descriptor.value = async function (...args: any[]) {
-    const start = Date.now()
-    const result = await method.apply(this, args)
-    const duration = Date.now() - start
-
-    logger.debug(`Method ${propertyName} executed`, {
-      duration: `${duration}ms`,
-      className: target.constructor.name,
-    })
-
-    return result
-  }
-
-  return descriptor
-}
-
-// エラー処理用のヘルパー
-export function logError(error: Error, context?: Record<string, any>) {
-  logger.error(error.message, context, error)
-}
-
-// データベースクエリログ用
-export function logDatabaseQuery(
-  query: string,
-  duration: number,
-  params?: any[],
-) {
-  logger.debug('Database query executed', {
-    query: query.substring(0, 200) + (query.length > 200 ? '...' : ''),
-    duration: `${duration}ms`,
-    paramCount: params?.length || 0,
-  })
-}
-
-// API 呼び出しログ用
-export function logApiCall(
-  url: string,
-  method: string,
-  duration: number,
-  statusCode: number,
-) {
-  const logMethod = statusCode >= 400 ? 'error' : 'info'
-
-  logger[logMethod]('External API call', {
-    url,
-    method,
-    duration: `${duration}ms`,
-    statusCode,
-  })
-}
-
-// ユーザーアクション追跡用
-export function logUserAction(
-  userId: string,
-  action: string,
-  details?: Record<string, any>,
-) {
-  logger.info('User action', {
-    userId,
-    action,
-    ...details,
-  })
-}
-
-// セキュリティイベントログ用
-export function logSecurityEvent(event: string, details: Record<string, any>) {
-  logger.warn('Security event', {
-    event,
-    ...details,
-    timestamp: new Date().toISOString(),
-  })
-}
-
-export default logger
+export const logger = new EdgeLogger()

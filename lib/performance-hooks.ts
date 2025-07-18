@@ -7,7 +7,7 @@ export function useExpensiveCalculation<T>(
   calculation: () => T,
   dependencies: React.DependencyList,
 ): T {
-  return useMemo(calculation, dependencies)
+  return useMemo(() => calculation(), dependencies)
 }
 
 // デバウンス付きコールバック
@@ -142,7 +142,8 @@ export function useCancellablePromise() {
   useEffect(() => {
     return () => {
       // コンポーネントアンマウント時に進行中のPromiseをクリア
-      pendingPromises.current.clear()
+      const promises = pendingPromises.current
+      promises.clear()
     }
   }, [])
 

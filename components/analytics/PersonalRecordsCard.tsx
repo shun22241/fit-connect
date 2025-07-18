@@ -96,7 +96,7 @@ export default function PersonalRecordsCard({
   useEffect(() => {
     // 実際のアプリでは API からデータを取得
     setRecords(mockRecords)
-  }, [])
+  }, [mockRecords])
 
   const filteredRecords =
     selectedCategory === 'all'

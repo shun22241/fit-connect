@@ -343,28 +343,39 @@ export function startPeriodicReporting(intervalMinutes: number = 5) {
   )
 }
 
-// システムリソース監視
+// システムリソース監視 (Edge Runtime対応)
 export function monitorSystemResources() {
+  // Edge Runtime では process.memoryUsage() と process.cpuUsage() が利用できません
+  // 代わりに基本的なメトリクスを記録します
   setInterval(() => {
-    const memoryUsage = process.memoryUsage()
-    const cpuUsage = process.cpuUsage()
+    try {
+      // Edge Runtime で利用可能な情報のみ使用
+      const timestamp = Date.now()
+      performanceMonitor.recordMetric('monitoring_timestamp', timestamp)
+      
+      // メモリ使用量は推定値を使用
+      if (typeof process !== 'undefined' && process.memoryUsage) {
+        const memoryUsage = process.memoryUsage()
+        performanceMonitor.recordMetric('memory_heap_used', memoryUsage.heapUsed)
+        performanceMonitor.recordMetric('memory_heap_total', memoryUsage.heapTotal)
+        performanceMonitor.recordMetric('memory_external', memoryUsage.external)
+      }
+      
+      // CPU使用量は推定値を使用
+      if (typeof process !== 'undefined' && process.cpuUsage) {
+        const cpuUsage = process.cpuUsage()
+        performanceMonitor.recordMetric('cpu_user', cpuUsage.user)
+        performanceMonitor.recordMetric('cpu_system', cpuUsage.system)
+      }
+    } catch (error) {
+      // Edge Runtime では利用できない場合はスキップ
+      logger.debug('System resource monitoring not available in Edge Runtime')
+    }
 
-    performanceMonitor.recordMetric('memory_heap_used', memoryUsage.heapUsed)
-    performanceMonitor.recordMetric('memory_heap_total', memoryUsage.heapTotal)
-    performanceMonitor.recordMetric('memory_external', memoryUsage.external)
-    performanceMonitor.recordMetric('cpu_user', cpuUsage.user)
-    performanceMonitor.recordMetric('cpu_system', cpuUsage.system)
-
+    // Edge Runtime対応のログ出力
     logger.debug('System resources monitored', {
-      memory: {
-        heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-        heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
-        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`,
-      },
-      cpu: {
-        user: cpuUsage.user,
-        system: cpuUsage.system,
-      },
+      timestamp: new Date().toISOString(),
+      runtime: 'edge-compatible'
     })
   }, 30000) // 30秒ごと
 }

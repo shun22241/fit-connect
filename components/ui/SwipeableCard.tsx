@@ -165,7 +165,7 @@ export default function SwipeableCard({
         document.removeEventListener('mouseup', handleGlobalMouseUp)
       }
     }
-  }, [isDragging, startPos, disabled])
+  }, [isDragging, startPos, disabled, handleMouseUp])
 
   const opacity = Math.max(0.5, 1 - Math.abs(dragOffset.x) / (threshold * 2))
   const rotation = dragOffset.x * 0.1

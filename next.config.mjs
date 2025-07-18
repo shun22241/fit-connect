@@ -18,6 +18,11 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
   },
+  
+  // Runtime configuration for Edge Runtime compatibility
+  async rewrites() {
+    return []
+  },
   serverExternalPackages: ['@prisma/client'],
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

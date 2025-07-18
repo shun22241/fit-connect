@@ -56,7 +56,7 @@ export default function UserProfilePage() {
     if (user && userId) {
       fetchUserProfile()
     }
-  }, [user, userId])
+  }, [user, userId, fetchUserProfile])
 
   const fetchUserProfile = async () => {
     try {

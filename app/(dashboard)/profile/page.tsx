@@ -69,7 +69,7 @@ export default function ProfilePage() {
       fetchProfile()
       fetchUserPosts()
     }
-  }, [user])
+  }, [user, fetchProfile, fetchUserPosts])
 
   const fetchProfile = async () => {
     try {
