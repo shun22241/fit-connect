@@ -4,8 +4,8 @@ import webpush from 'web-push'
 
 // VAPID キーの設定（環境変数から取得）
 const vapidKeys = {
-  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  privateKey: process.env.VAPID_PRIVATE_KEY,
+  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
+  privateKey: process.env.VAPID_PRIVATE_KEY || '',
   subject: process.env.VAPID_EMAIL || 'mailto:admin@fitconnect.app',
 }
 
