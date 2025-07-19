@@ -6,7 +6,12 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
 
-  console.log('🔄 Auth callback:', { code: !!code, next, origin })
+  console.log('🔄 Auth callback:', { 
+    code: !!code, 
+    next, 
+    origin,
+    requestUrl: request.url 
+  })
 
   if (code) {
     const supabase = await createClient()
@@ -14,21 +19,25 @@ export async function GET(request: Request) {
     
     if (!error) {
       console.log('✅ Session exchange successful, redirecting to:', next)
-      const forwardedHost = request.headers.get('x-forwarded-host')
-      const isLocalEnv = process.env.NODE_ENV === 'development'
       
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
+      // Vercel環境での特別な処理
+      const forwardedHost = request.headers.get('x-forwarded-host')
+      const isProduction = process.env.NODE_ENV === 'production'
+      
+      // 本番環境ではVercelのURLを使用
+      if (isProduction && forwardedHost) {
+        const redirectUrl = `https://${forwardedHost}${next}`
+        console.log('🚀 Production redirect to:', redirectUrl)
+        return NextResponse.redirect(redirectUrl)
       }
+      
+      // 開発環境
+      return NextResponse.redirect(`${origin}${next}`)
     } else {
       console.error('❌ Session exchange failed:', error)
     }
   }
 
-  console.log('❌ Auth callback failed, redirecting to error page')
+  console.log('❌ Auth callback failed, redirecting to login')
   return NextResponse.redirect(`${origin}/login?error=auth_failed`)
 }

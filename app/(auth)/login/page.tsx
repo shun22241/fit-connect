@@ -30,62 +30,49 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      console.log('🔐 ログイン試行:', email)
-
-      const result = await supabase.auth.signInWithPassword({
+      console.log('🔐 ログイン開始:', email)
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      console.log('🔐 ログイン結果:', result)
-
-      if (result.error) {
-        console.error('🔐 ログインエラー:', result.error)
-        throw result.error
-      }
-
-      console.log('✅ ログイン成功、リダイレクト中...')
-
-      // 成功メッセージを表示して手動でリダイレクト
-      const userConfirm = confirm(
-        'ログイン成功！ダッシュボードに移動しますか？',
-      )
-      if (userConfirm) {
-        // 複数の方法でリダイレクトを試行
-        try {
-          window.location.replace('/dashboard')
-        } catch (e) {
-          try {
-            window.location.href = '/dashboard'
-          } catch (e2) {
-            // 最終手段として新しいタブで開く
-            window.open('/dashboard', '_self')
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error('🔐 ログイン処理エラー:', error)
-      setError(error.message || 'ログインに失敗しました')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleGoogleLogin = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${location.origin}/auth/callback`,
-        },
+      console.log('📊 ログイン結果:', { 
+        user: data.user ? 'あり' : 'なし',
+        session: data.session ? 'あり' : 'なし',
+        error: error?.message 
       })
 
       if (error) throw error
+
+      if (data.user && data.session) {
+        console.log('✅ ログイン成功 - セッションを確認中...')
+        
+        // セッションが確実に保存されるまで待つ
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // セッションが正しく設定されたか確認
+        const sessionCheck = await fetch('/api/auth/session')
+        const sessionData = await sessionCheck.json()
+        
+        console.log('🔍 セッション確認結果:', sessionData)
+        
+        if (sessionData.hasSession) {
+          console.log('✅ セッション確認完了 - ダッシュボードへリダイレクト')
+          // ページ全体をリロードしてセッションを確実に更新
+          window.location.href = '/dashboard'
+        } else {
+          console.error('❌ セッションが保存されていません')
+          setError('セッションの保存に失敗しました。もう一度お試しください。')
+        }
+      } else {
+        console.warn('⚠️ ログイン成功したがユーザーまたはセッションがない')
+        setError('ログインに成功しましたが、セッションが作成されませんでした。')
+      }
     } catch (error: any) {
-      setError(error.message)
+      console.error('❌ ログインエラー:', error)
+      setError(error.message || 'ログインに失敗しました')
+    } finally {
       setLoading(false)
     }
   }
@@ -136,50 +123,8 @@ export default function LoginPage() {
               {loading ? 'ログイン中...' : 'ログイン'}
             </Button>
           </form>
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                または
-              </span>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-          >
-            Googleでログイン
-          </Button>
-
-          {/* デモ用クイックログイン */}
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2 text-sm">
-              🎯 デモ用クイックアクセス
-            </h4>
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs"
-                onClick={() => {
-                  setEmail('demo@fitconnect.com')
-                  setPassword('demo123')
-                }}
-                disabled={loading}
-              >
-                📊 デモユーザーとしてログイン
-              </Button>
-              <p className="text-xs text-blue-700">
-                ※実際のアカウント作成なしで全機能をお試しいただけます
-              </p>
-            </div>
-          </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-col space-y-4">
           <p className="text-center text-sm text-gray-600 w-full">
             アカウントをお持ちでない方は{' '}
             <Link
@@ -189,6 +134,16 @@ export default function LoginPage() {
               新規登録
             </Link>
           </p>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="w-full text-center">
+              <Link
+                href="/auth-debug"
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                🔍 認証デバッグツール
+              </Link>
+            </div>
+          )}
         </CardFooter>
       </Card>
     </div>

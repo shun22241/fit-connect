@@ -106,22 +106,27 @@ export async function demoSignUp(
   // 少し遅延を追加
   await new Promise((resolve) => setTimeout(resolve, 800))
 
+  // 開発環境での特別処理
+  const isDevelopment = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname === '127.0.0.1' ||
+     process.env.NODE_ENV === 'development')
+
   // 既存ユーザーチェック
   const existingUser = DEMO_USERS.find((u) => u.email === email)
-  if (existingUser) {
-    return {
-      user: null,
-      error: 'このメールアドレスは既に使用されています',
-    }
-  }
-
-  // 保存されたユーザーもチェック
   const savedUsers = getSavedDemoUsers()
   const existingSavedUser = savedUsers.find((u) => u.email === email)
-  if (existingSavedUser) {
-    return {
-      user: null,
-      error: 'このメールアドレスは既に使用されています',
+  
+  if (existingUser || existingSavedUser) {
+    // 開発環境では既存ユーザーを自動的にクリーンアップして再作成
+    if (isDevelopment) {
+      console.log('🔧 Development mode: Cleaning up existing user for', email)
+      await cleanupExistingUser(email)
+    } else {
+      return {
+        user: null,
+        error: 'このメールアドレスは既に使用されています',
+      }
     }
   }
 
@@ -135,14 +140,23 @@ export async function demoSignUp(
     createdAt: new Date(),
   }
 
-  // ローカルストレージに保存
-  savedUsers.push(newUser)
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(USERS_KEY, JSON.stringify(savedUsers))
-  }
+  try {
+    // ローカルストレージに保存
+    const cleanedSavedUsers = getSavedDemoUsers().filter(u => u.email !== email)
+    cleanedSavedUsers.push(newUser)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(USERS_KEY, JSON.stringify(cleanedSavedUsers))
+    }
 
-  setDemoSession(newUser)
-  return { user: newUser, error: null }
+    setDemoSession(newUser)
+    return { user: newUser, error: null }
+  } catch (error) {
+    console.error('Failed to save demo user:', error)
+    return {
+      user: null,
+      error: '登録に失敗しました。もう一度お試しください。',
+    }
+  }
 }
 
 // ログアウト
@@ -162,6 +176,27 @@ function getSavedDemoUsers(): DemoUser[] {
   }
 }
 
+// 既存ユーザーのクリーンアップ
+export async function cleanupExistingUser(email: string): Promise<void> {
+  if (typeof window === 'undefined') return
+
+  try {
+    // ローカルストレージから削除
+    const savedUsers = getSavedDemoUsers().filter(u => u.email !== email)
+    localStorage.setItem(USERS_KEY, JSON.stringify(savedUsers))
+    
+    // 現在のセッションがそのユーザーの場合はクリア
+    const currentSession = getDemoSession()
+    if (currentSession && currentSession.user?.email === email) {
+      clearDemoSession()
+    }
+    
+    console.log(`🧹 Cleaned up existing user: ${email}`)
+  } catch (error) {
+    console.error('Failed to cleanup existing user:', error)
+  }
+}
+
 // 全デモユーザーを取得（デフォルト + 保存済み）
 export function getAllDemoUsers(): DemoUser[] {
   return [...DEMO_USERS, ...getSavedDemoUsers()]
@@ -171,6 +206,19 @@ export function getAllDemoUsers(): DemoUser[] {
 export function findDemoUser(email: string): DemoUser | null {
   const allUsers = getAllDemoUsers()
   return allUsers.find((u) => u.email === email) || null
+}
+
+// デモユーザーデータをリセット（開発用）
+export function resetDemoUsers(): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    localStorage.removeItem(USERS_KEY)
+    localStorage.removeItem(STORAGE_KEY)
+    console.log('🔄 Demo users reset')
+  } catch (error) {
+    console.error('Failed to reset demo users:', error)
+  }
 }
 
 // Supabase互換のレスポンス形式
