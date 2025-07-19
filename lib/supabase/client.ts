@@ -6,14 +6,22 @@ export function createClient() {
 
   console.log('🔧 Creating Supabase client...')
   console.log('📍 Supabase URL:', supabaseUrl)
-  console.log('🔑 Supabase Key:', supabaseKey ? `${supabaseKey.substring(0, 20)}...` : 'NOT SET')
+  console.log(
+    '🔑 Supabase Key:',
+    supabaseKey ? `${supabaseKey.substring(0, 20)}...` : 'NOT SET',
+  )
   console.log('🌍 Environment:', process.env.NODE_ENV)
 
   if (!supabaseUrl || !supabaseKey) {
     console.error('❌ Missing Supabase environment variables!')
     console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl)
-    console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseKey ? 'SET' : 'NOT SET')
-    throw new Error('Supabase environment variables are not properly configured')
+    console.error(
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY:',
+      supabaseKey ? 'SET' : 'NOT SET',
+    )
+    throw new Error(
+      'Supabase environment variables are not properly configured',
+    )
   }
 
   try {

@@ -10,34 +10,34 @@ export default function AuthCleanupPage() {
 
   const checkAuthStatus = async () => {
     if (!email) return
-    
+
     setLoading(true)
     setResult(null)
-    
+
     try {
       const supabase = createClient()
-      
+
       // Check current session
       const { data: sessionData } = await supabase.auth.getSession()
-      
+
       // Check user data
       const { data: userData } = await supabase.auth.getUser()
-      
+
       // Try to get user by email from auth.users (this requires service role)
       // We'll use the admin API to check
       const response = await fetch('/api/admin/check-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
       })
-      
+
       const adminData = await response.json()
-      
+
       setResult({
         session: sessionData,
         user: userData,
         admin: adminData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
     } catch (error) {
       console.error('Error checking auth status:', error)
@@ -49,16 +49,16 @@ export default function AuthCleanupPage() {
 
   const cleanupUser = async () => {
     if (!email) return
-    
+
     setLoading(true)
-    
+
     try {
       const response = await fetch('/api/admin/cleanup-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
       })
-      
+
       const result = await response.json()
       setResult(result)
     } catch (error) {
@@ -71,17 +71,17 @@ export default function AuthCleanupPage() {
 
   const resetAuth = async () => {
     setLoading(true)
-    
+
     try {
       const supabase = createClient()
       await supabase.auth.signOut()
-      
+
       // Clear any cached data
       if (typeof window !== 'undefined') {
         localStorage.clear()
         sessionStorage.clear()
       }
-      
+
       setResult({ message: 'Auth reset complete' })
     } catch (error) {
       console.error('Error resetting auth:', error)
@@ -95,12 +95,15 @@ export default function AuthCleanupPage() {
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Supabase Auth Cleanup Tool</h1>
-        
+
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">⚠️ Admin Tool</h2>
+          <h2 className="text-lg font-semibold text-red-800 mb-2">
+            ⚠️ Admin Tool
+          </h2>
           <p className="text-red-700 text-sm">
-            This tool is for debugging and fixing authentication inconsistencies. 
-            Use with caution as it can permanently delete user data.
+            This tool is for debugging and fixing authentication
+            inconsistencies. Use with caution as it can permanently delete user
+            data.
           </p>
         </div>
 
@@ -156,13 +159,24 @@ export default function AuthCleanupPage() {
         )}
 
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">How to Use</h3>
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">
+            How to Use
+          </h3>
           <ol className="text-blue-700 text-sm space-y-1">
             <li>1. Enter the problematic email address</li>
-            <li>2. Click "Check Status" to see auth/user data inconsistencies</li>
-            <li>3. If data is corrupted, click "Clean Up User" to remove all traces</li>
+            <li>
+              2. Click &quot;Check Status&quot; to see auth/user data
+              inconsistencies
+            </li>
+            <li>
+              3. If data is corrupted, click &quot;Clean Up User&quot; to remove
+              all traces
+            </li>
             <li>4. User can then re-register with same or different email</li>
-            <li>5. Use "Reset Current Auth" to clear browser session/cache</li>
+            <li>
+              5. Use &quot;Reset Current Auth&quot; to clear browser
+              session/cache
+            </li>
           </ol>
         </div>
       </div>

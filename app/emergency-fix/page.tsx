@@ -9,17 +9,17 @@ export default function EmergencyFixPage() {
 
   const scanCorruption = async () => {
     if (!email) return
-    
+
     setLoading(true)
     setResult(null)
-    
+
     try {
       const response = await fetch('/api/admin/emergency-cleanup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'scan' })
+        body: JSON.stringify({ email, action: 'scan' }),
       })
-      
+
       const data = await response.json()
       setResult(data)
     } catch (error) {
@@ -32,22 +32,22 @@ export default function EmergencyFixPage() {
 
   const emergencyCleanup = async () => {
     if (!email) return
-    
+
     const confirmed = confirm(
-      `⚠️ EMERGENCY CLEANUP\n\nThis will PERMANENTLY DELETE all data for: ${email}\n\nThe user will need to re-register. Continue?`
+      `⚠️ EMERGENCY CLEANUP\n\nThis will PERMANENTLY DELETE all data for: ${email}\n\nThe user will need to re-register. Continue?`,
     )
-    
+
     if (!confirmed) return
-    
+
     setLoading(true)
-    
+
     try {
       const response = await fetch('/api/admin/emergency-cleanup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'cleanup' })
+        body: JSON.stringify({ email, action: 'cleanup' }),
       })
-      
+
       const data = await response.json()
       setResult(data)
     } catch (error) {
@@ -60,16 +60,16 @@ export default function EmergencyFixPage() {
 
   const suggestEmails = async () => {
     if (!email) return
-    
+
     setLoading(true)
-    
+
     try {
       const response = await fetch('/api/admin/emergency-cleanup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, action: 'suggest_email' })
+        body: JSON.stringify({ email, action: 'suggest_email' }),
       })
-      
+
       const data = await response.json()
       setResult(data)
     } catch (error) {
@@ -84,7 +84,7 @@ export default function EmergencyFixPage() {
     if (typeof window !== 'undefined') {
       localStorage.clear()
       sessionStorage.clear()
-      
+
       // Force reload to clear any in-memory state
       window.location.reload()
     }
@@ -94,10 +94,12 @@ export default function EmergencyFixPage() {
     <div className="min-h-screen p-8 bg-red-50">
       <div className="max-w-4xl mx-auto">
         <div className="bg-red-100 border-2 border-red-500 rounded-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-red-800 mb-2">🚨 EMERGENCY AUTH REPAIR</h1>
+          <h1 className="text-3xl font-bold text-red-800 mb-2">
+            🚨 EMERGENCY AUTH REPAIR
+          </h1>
           <p className="text-red-700">
-            This tool fixes critical Supabase authentication corruption where users exist in database 
-            but Auth API considers them invalid.
+            This tool fixes critical Supabase authentication corruption where
+            users exist in database but Auth API considers them invalid.
           </p>
         </div>
 
@@ -105,7 +107,9 @@ export default function EmergencyFixPage() {
           {/* Input and Actions */}
           <div className="space-y-4">
             <div className="bg-white p-6 rounded-lg shadow border-l-4 border-red-500">
-              <h2 className="text-xl font-semibold mb-4 text-red-800">Corrupted Email</h2>
+              <h2 className="text-xl font-semibold mb-4 text-red-800">
+                Corrupted Email
+              </h2>
               <input
                 type="email"
                 placeholder="Enter corrupted email address"
@@ -113,7 +117,7 @@ export default function EmergencyFixPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border-2 rounded-lg mb-4 focus:border-red-500"
               />
-              
+
               <div className="space-y-3">
                 <button
                   onClick={scanCorruption}
@@ -122,7 +126,7 @@ export default function EmergencyFixPage() {
                 >
                   {loading ? '🔍 Scanning...' : '🔍 Scan for Corruption'}
                 </button>
-                
+
                 <button
                   onClick={emergencyCleanup}
                   disabled={loading || !email}
@@ -130,7 +134,7 @@ export default function EmergencyFixPage() {
                 >
                   {loading ? '🧹 Cleaning...' : '🧹 EMERGENCY CLEANUP'}
                 </button>
-                
+
                 <button
                   onClick={suggestEmails}
                   disabled={loading || !email}
@@ -142,7 +146,9 @@ export default function EmergencyFixPage() {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow border-l-4 border-yellow-500">
-              <h2 className="text-xl font-semibold mb-4 text-yellow-800">Browser Cache</h2>
+              <h2 className="text-xl font-semibold mb-4 text-yellow-800">
+                Browser Cache
+              </h2>
               <button
                 onClick={clearBrowserCache}
                 className="w-full p-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
@@ -157,39 +163,54 @@ export default function EmergencyFixPage() {
 
           {/* Instructions */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">📋 Emergency Fix Process</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              📋 Emergency Fix Process
+            </h2>
             <ol className="space-y-3 text-sm">
               <li className="flex items-start">
-                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">1</span>
+                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">
+                  1
+                </span>
                 <div>
-                  <strong>Scan for Corruption:</strong> Identify what's wrong with the user data
+                  <strong>Scan for Corruption:</strong> Identify what&apos;s
+                  wrong with the user data
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">2</span>
+                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">
+                  2
+                </span>
                 <div>
-                  <strong>Emergency Cleanup:</strong> Completely remove corrupted user from all tables
+                  <strong>Emergency Cleanup:</strong> Completely remove
+                  corrupted user from all tables
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">3</span>
+                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">
+                  3
+                </span>
                 <div>
-                  <strong>Clear Browser Cache:</strong> Remove any cached authentication state
+                  <strong>Clear Browser Cache:</strong> Remove any cached
+                  authentication state
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">4</span>
+                <span className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-0.5">
+                  4
+                </span>
                 <div>
-                  <strong>Re-register:</strong> User can now register with same or new email
+                  <strong>Re-register:</strong> User can now register with same
+                  or new email
                 </div>
               </li>
             </ol>
-            
+
             <div className="mt-6 p-4 bg-red-50 rounded-lg">
               <h3 className="font-semibold text-red-800 mb-2">⚠️ Warning</h3>
               <p className="text-red-700 text-sm">
-                Emergency cleanup permanently deletes user data. Only use when normal cleanup fails.
-                User will need to re-register and lose any associated data.
+                Emergency cleanup permanently deletes user data. Only use when
+                normal cleanup fails. User will need to re-register and lose any
+                associated data.
               </p>
             </div>
           </div>
@@ -199,31 +220,43 @@ export default function EmergencyFixPage() {
         {result && (
           <div className="mt-6 bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">
-              {result.corruption_detected ? '⚠️ Corruption Detected' : '✅ Results'}
+              {result.corruption_detected
+                ? '⚠️ Corruption Detected'
+                : '✅ Results'}
             </h2>
-            
+
             {result.suggested_emails && (
               <div className="mb-4 p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-2">💡 Suggested Clean Email Addresses:</h3>
+                <h3 className="font-semibold text-green-800 mb-2">
+                  💡 Suggested Clean Email Addresses:
+                </h3>
                 <ul className="list-disc list-inside space-y-1">
                   {result.suggested_emails.map((email: string, i: number) => (
-                    <li key={i} className="text-green-700 font-mono text-sm">{email}</li>
+                    <li key={i} className="text-green-700 font-mono text-sm">
+                      {email}
+                    </li>
                   ))}
                 </ul>
               </div>
             )}
-            
+
             {result.cleanup_completed && (
               <div className="mb-4 p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold text-green-800">✅ Cleanup Completed Successfully!</h3>
-                <p className="text-green-700 text-sm">User can now re-register with the same email address.</p>
+                <h3 className="font-semibold text-green-800">
+                  ✅ Cleanup Completed Successfully!
+                </h3>
+                <p className="text-green-700 text-sm">
+                  User can now re-register with the same email address.
+                </p>
               </div>
             )}
-            
+
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">Detailed Log:</h3>
               <pre className="text-xs overflow-auto max-h-96 whitespace-pre-wrap">
-                {result.steps ? result.steps.join('\n') : JSON.stringify(result, null, 2)}
+                {result.steps
+                  ? result.steps.join('\n')
+                  : JSON.stringify(result, null, 2)}
               </pre>
             </div>
           </div>

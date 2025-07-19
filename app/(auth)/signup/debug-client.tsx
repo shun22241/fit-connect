@@ -9,7 +9,9 @@ export default function DebugClient() {
     console.log('📍 Window location:', window.location.origin)
     console.log('🌍 Browser environment variables:', {
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        ? 'SET'
+        : 'NOT SET',
       NODE_ENV: process.env.NODE_ENV,
     })
 
@@ -17,7 +19,7 @@ export default function DebugClient() {
     try {
       const supabase = createClient()
       console.log('✅ Supabase client created:', supabase)
-      
+
       // Test auth methods availability
       console.log('🔐 Auth methods available:', {
         signUp: typeof supabase.auth.signUp,

@@ -10,13 +10,15 @@ export default function SessionTestPage() {
 
   useEffect(() => {
     checkSession()
-    
+
     // リアルタイムでセッション変更を監視
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔄 Auth state changed:', event, session)
       checkSession()
     })
-    
+
     return () => {
       subscription.unsubscribe()
     }
@@ -25,24 +27,29 @@ export default function SessionTestPage() {
   const checkSession = async () => {
     try {
       // クライアントサイドのセッション
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession()
+
       // サーバーサイドのセッション確認
       const serverResponse = await fetch('/api/auth/session')
       const serverSession = await serverResponse.json()
-      
+
       // ローカルストレージの確認
       const localStorage = window.localStorage
-      const supabaseKeys = Object.keys(localStorage).filter(key => key.includes('supabase'))
+      const supabaseKeys = Object.keys(localStorage).filter((key) =>
+        key.includes('supabase'),
+      )
       const supabaseData: any = {}
-      supabaseKeys.forEach(key => {
+      supabaseKeys.forEach((key) => {
         try {
           supabaseData[key] = JSON.parse(localStorage.getItem(key) || '{}')
         } catch {
           supabaseData[key] = localStorage.getItem(key)
         }
       })
-      
+
       setSessionInfo({
         client: {
           hasSession: !!session,
@@ -50,11 +57,13 @@ export default function SessionTestPage() {
           accessToken: session?.access_token ? '存在' : 'なし',
           refreshToken: session?.refresh_token ? '存在' : 'なし',
           expiresAt: session?.expires_at,
-          error: sessionError?.message
+          error: sessionError?.message,
         },
         server: serverSession,
         localStorage: supabaseData,
-        cookies: document.cookie.split(';').filter(c => c.includes('supabase'))
+        cookies: document.cookie
+          .split(';')
+          .filter((c) => c.includes('supabase')),
       })
     } catch (error) {
       console.error('Session check error:', error)
@@ -69,9 +78,9 @@ export default function SessionTestPage() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
       })
-      
+
       console.log('Login result:', { data, error })
       setTimeout(checkSession, 1000) // 1秒後に再チェック
     } catch (error) {
@@ -96,7 +105,7 @@ export default function SessionTestPage() {
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">セッション診断ツール</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">操作</h2>
@@ -130,14 +139,22 @@ export default function SessionTestPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold">クライアント側:</h3>
-                  <div className={`p-2 rounded ${sessionInfo.client?.hasSession ? 'bg-green-100' : 'bg-red-100'}`}>
-                    {sessionInfo.client?.hasSession ? '✅ セッションあり' : '❌ セッションなし'}
+                  <div
+                    className={`p-2 rounded ${sessionInfo.client?.hasSession ? 'bg-green-100' : 'bg-red-100'}`}
+                  >
+                    {sessionInfo.client?.hasSession
+                      ? '✅ セッションあり'
+                      : '❌ セッションなし'}
                   </div>
                 </div>
                 <div>
                   <h3 className="font-semibold">サーバー側:</h3>
-                  <div className={`p-2 rounded ${sessionInfo.server?.hasSession ? 'bg-green-100' : 'bg-red-100'}`}>
-                    {sessionInfo.server?.hasSession ? '✅ セッションあり' : '❌ セッションなし'}
+                  <div
+                    className={`p-2 rounded ${sessionInfo.server?.hasSession ? 'bg-green-100' : 'bg-red-100'}`}
+                  >
+                    {sessionInfo.server?.hasSession
+                      ? '✅ セッションあり'
+                      : '❌ セッションなし'}
                   </div>
                 </div>
               </div>
@@ -155,7 +172,9 @@ export default function SessionTestPage() {
         )}
 
         <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="font-semibold text-yellow-800 mb-2">💡 セッション問題の解決方法</h3>
+          <h3 className="font-semibold text-yellow-800 mb-2">
+            💡 セッション問題の解決方法
+          </h3>
           <ol className="text-yellow-700 text-sm space-y-1 list-decimal list-inside">
             <li>ブラウザのCookieが有効になっているか確認</li>
             <li>localStorage/sessionStorageがブロックされていないか確認</li>

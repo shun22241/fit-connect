@@ -107,16 +107,17 @@ export async function demoSignUp(
   await new Promise((resolve) => setTimeout(resolve, 800))
 
   // 開発環境での特別処理
-  const isDevelopment = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || 
-     window.location.hostname === '127.0.0.1' ||
-     process.env.NODE_ENV === 'development')
+  const isDevelopment =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      process.env.NODE_ENV === 'development')
 
   // 既存ユーザーチェック
   const existingUser = DEMO_USERS.find((u) => u.email === email)
   const savedUsers = getSavedDemoUsers()
   const existingSavedUser = savedUsers.find((u) => u.email === email)
-  
+
   if (existingUser || existingSavedUser) {
     // 開発環境では既存ユーザーを自動的にクリーンアップして再作成
     if (isDevelopment) {
@@ -142,7 +143,9 @@ export async function demoSignUp(
 
   try {
     // ローカルストレージに保存
-    const cleanedSavedUsers = getSavedDemoUsers().filter(u => u.email !== email)
+    const cleanedSavedUsers = getSavedDemoUsers().filter(
+      (u) => u.email !== email,
+    )
     cleanedSavedUsers.push(newUser)
     if (typeof window !== 'undefined') {
       localStorage.setItem(USERS_KEY, JSON.stringify(cleanedSavedUsers))
@@ -182,15 +185,15 @@ export async function cleanupExistingUser(email: string): Promise<void> {
 
   try {
     // ローカルストレージから削除
-    const savedUsers = getSavedDemoUsers().filter(u => u.email !== email)
+    const savedUsers = getSavedDemoUsers().filter((u) => u.email !== email)
     localStorage.setItem(USERS_KEY, JSON.stringify(savedUsers))
-    
+
     // 現在のセッションがそのユーザーの場合はクリア
     const currentSession = getDemoSession()
     if (currentSession && currentSession.user?.email === email) {
       clearDemoSession()
     }
-    
+
     console.log(`🧹 Cleaned up existing user: ${email}`)
   } catch (error) {
     console.error('Failed to cleanup existing user:', error)
@@ -211,7 +214,7 @@ export function findDemoUser(email: string): DemoUser | null {
 // デモユーザーデータをリセット（開発用）
 export function resetDemoUsers(): void {
   if (typeof window === 'undefined') return
-  
+
   try {
     localStorage.removeItem(USERS_KEY)
     localStorage.removeItem(STORAGE_KEY)

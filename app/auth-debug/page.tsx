@@ -17,13 +17,14 @@ export default function AuthDebugPage() {
   const checkAuthState = async () => {
     try {
       console.log('🔍 認証状態をチェック中...')
-      
+
       // セッション情報を取得
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-      
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession()
+
       // ユーザー情報を取得
       const { data: userData, error: userError } = await supabase.auth.getUser()
-      
+
       const state = {
         timestamp: new Date().toISOString(),
         session: {
@@ -44,13 +45,22 @@ export default function AuthDebugPage() {
           createdAt: userData.user?.created_at,
         },
         browser: {
-          localStorage: typeof window !== 'undefined' ? Object.keys(localStorage).filter(k => k.includes('supabase')) : [],
-          sessionStorage: typeof window !== 'undefined' ? Object.keys(sessionStorage).filter(k => k.includes('supabase')) : [],
-          cookies: typeof document !== 'undefined' ? document.cookie : 'アクセス不可',
+          localStorage:
+            typeof window !== 'undefined'
+              ? Object.keys(localStorage).filter((k) => k.includes('supabase'))
+              : [],
+          sessionStorage:
+            typeof window !== 'undefined'
+              ? Object.keys(sessionStorage).filter((k) =>
+                  k.includes('supabase'),
+                )
+              : [],
+          cookies:
+            typeof document !== 'undefined' ? document.cookie : 'アクセス不可',
           url: typeof window !== 'undefined' ? window.location.href : '',
-        }
+        },
       }
-      
+
       console.log('📊 認証状態:', state)
       setAuthState(state)
     } catch (error) {
@@ -66,9 +76,9 @@ export default function AuthDebugPage() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: 'test@example.com',
-        password: 'test123'
+        password: 'test123',
       })
-      
+
       console.log('🔐 テストログイン結果:', { data, error })
       await checkAuthState()
     } catch (error) {
@@ -104,7 +114,7 @@ export default function AuthDebugPage() {
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">🔍 認証デバッグツール</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">操作</h2>
@@ -142,10 +152,14 @@ export default function AuthDebugPage() {
             <h2 className="text-xl font-semibold mb-4">認証状態サマリー</h2>
             {authState && (
               <div className="space-y-2 text-sm">
-                <div className={`p-2 rounded ${authState.session?.hasSession ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                <div
+                  className={`p-2 rounded ${authState.session?.hasSession ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                >
                   セッション: {authState.session?.hasSession ? 'あり' : 'なし'}
                 </div>
-                <div className={`p-2 rounded ${authState.user?.hasUser ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                <div
+                  className={`p-2 rounded ${authState.user?.hasUser ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                >
                   ユーザー: {authState.user?.hasUser ? 'あり' : 'なし'}
                 </div>
                 {authState.user?.hasUser && (
@@ -173,9 +187,13 @@ export default function AuthDebugPage() {
         )}
 
         <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="font-semibold text-yellow-800 mb-2">💡 トラブルシューティング</h3>
+          <h3 className="font-semibold text-yellow-800 mb-2">
+            💡 トラブルシューティング
+          </h3>
           <ul className="text-yellow-700 text-sm space-y-1">
-            <li>1. セッションが「なし」の場合 → ログインが正常に完了していません</li>
+            <li>
+              1. セッションが「なし」の場合 → ログインが正常に完了していません
+            </li>
             <li>2. ユーザーが「なし」の場合 → 認証トークンが無効です</li>
             <li>3. メール未確認の場合 → メール確認が必要かもしれません</li>
             <li>4. 「ダッシュボードに強制移動」でアクセスを試してください</li>

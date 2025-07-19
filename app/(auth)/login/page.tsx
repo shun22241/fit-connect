@@ -31,32 +31,32 @@ export default function LoginPage() {
 
     try {
       console.log('🔐 ログイン開始:', email)
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      console.log('📊 ログイン結果:', { 
+      console.log('📊 ログイン結果:', {
         user: data.user ? 'あり' : 'なし',
         session: data.session ? 'あり' : 'なし',
-        error: error?.message 
+        error: error?.message,
       })
 
       if (error) throw error
 
       if (data.user && data.session) {
         console.log('✅ ログイン成功 - セッションを確認中...')
-        
+
         // セッションが確実に保存されるまで待つ
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
         // セッションが正しく設定されたか確認
         const sessionCheck = await fetch('/api/auth/session')
         const sessionData = await sessionCheck.json()
-        
+
         console.log('🔍 セッション確認結果:', sessionData)
-        
+
         if (sessionData.hasSession) {
           console.log('✅ セッション確認完了 - ダッシュボードへリダイレクト')
           // ページ全体をリロードしてセッションを確実に更新

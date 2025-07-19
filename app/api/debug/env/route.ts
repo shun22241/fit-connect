@@ -13,19 +13,22 @@ export async function GET() {
     supabase: {
       url: {
         exists: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        startsWithHttps: process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://'),
-        endsWithSupabaseCo: process.env.NEXT_PUBLIC_SUPABASE_URL?.endsWith('.supabase.co'),
+        startsWithHttps:
+          process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://'),
+        endsWithSupabaseCo:
+          process.env.NEXT_PUBLIC_SUPABASE_URL?.endsWith('.supabase.co'),
         length: process.env.NEXT_PUBLIC_SUPABASE_URL?.length,
       },
       anonKey: {
         exists: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        startsWithEyJ: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.startsWith('eyJ'),
+        startsWithEyJ:
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.startsWith('eyJ'),
         length: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length,
       },
       serviceKey: {
         exists: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
         length: process.env.SUPABASE_SERVICE_ROLE_KEY?.length,
-      }
+      },
     },
     nextAuth: {
       url: process.env.NEXTAUTH_URL,

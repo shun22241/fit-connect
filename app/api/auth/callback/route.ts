@@ -6,31 +6,31 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
 
-  console.log('🔄 Auth callback:', { 
-    code: !!code, 
-    next, 
+  console.log('🔄 Auth callback:', {
+    code: !!code,
+    next,
     origin,
-    requestUrl: request.url 
+    requestUrl: request.url,
   })
 
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (!error) {
       console.log('✅ Session exchange successful, redirecting to:', next)
-      
+
       // Vercel環境での特別な処理
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isProduction = process.env.NODE_ENV === 'production'
-      
+
       // 本番環境ではVercelのURLを使用
       if (isProduction && forwardedHost) {
         const redirectUrl = `https://${forwardedHost}${next}`
         console.log('🚀 Production redirect to:', redirectUrl)
         return NextResponse.redirect(redirectUrl)
       }
-      
+
       // 開発環境
       return NextResponse.redirect(`${origin}${next}`)
     } else {

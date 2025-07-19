@@ -11,13 +11,16 @@ export default async function DashboardLayout({
   console.log('🔍 ダッシュボードレイアウト: 認証チェック中...')
 
   // まずセッションを確認
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-  
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
+
   console.log('📊 セッション状態:', {
     hasSession: !!session,
     sessionError: sessionError?.message,
     userId: session?.user?.id,
-    email: session?.user?.email
+    email: session?.user?.email,
   })
 
   if (!session) {
@@ -26,12 +29,15 @@ export default async function DashboardLayout({
   }
 
   // セッションがある場合はユーザー情報を取得
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
 
   console.log('👤 ユーザー情報:', {
     hasUser: !!user,
     userError: userError?.message,
-    email: user?.email
+    email: user?.email,
   })
 
   if (!user) {

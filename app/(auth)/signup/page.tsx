@@ -32,7 +32,7 @@ export default function SignupPage() {
     console.log('🚀 Starting signup process...')
     console.log('📧 Email:', email)
     console.log('🔒 Password length:', password.length)
-    
+
     setLoading(true)
     setError(null)
 
@@ -46,7 +46,7 @@ export default function SignupPage() {
     try {
       console.log('📡 Calling supabase.auth.signUp...')
       console.log('🌐 Redirect URL:', `${location.origin}/auth/callback`)
-      
+
       const startTime = Date.now()
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -56,7 +56,7 @@ export default function SignupPage() {
         },
       })
       const endTime = Date.now()
-      
+
       console.log(`⏱️ API call took ${endTime - startTime}ms`)
       console.log('📤 Signup response:', {
         data: data,
@@ -74,7 +74,10 @@ export default function SignupPage() {
         console.log('✅ User created successfully:', data.user.id)
         console.log('📧 User email:', data.user.email)
         console.log('🕐 Created at:', data.user.created_at)
-        console.log('✉️ Email confirmed:', data.user.email_confirmed_at ? 'Yes' : 'No')
+        console.log(
+          '✉️ Email confirmed:',
+          data.user.email_confirmed_at ? 'Yes' : 'No',
+        )
       } else {
         console.warn('⚠️ No user data returned')
       }
@@ -88,20 +91,26 @@ export default function SignupPage() {
         name: error.name,
         stack: error.stack,
       })
-      
+
       // Handle specific error cases
       let errorMessage = error.message || '新規登録に失敗しました'
-      
+
       if (error.message?.includes('email_provider_disabled')) {
-        errorMessage = 'メール認証が無効になっています。管理者にお問い合わせください。'
+        errorMessage =
+          'メール認証が無効になっています。管理者にお問い合わせください。'
       } else if (error.message?.includes('email_address_invalid')) {
-        errorMessage = 'メールアドレスが無効です。正しいメールアドレスを入力してください。'
+        errorMessage =
+          'メールアドレスが無効です。正しいメールアドレスを入力してください。'
       } else if (error.message?.includes('email_address_not_confirmed')) {
-        errorMessage = 'メールアドレスが確認されていません。確認メールをチェックしてください。'
-      } else if (error.message?.includes('user_already_exists') || error.message?.includes('email_address_in_use')) {
+        errorMessage =
+          'メールアドレスが確認されていません。確認メールをチェックしてください。'
+      } else if (
+        error.message?.includes('user_already_exists') ||
+        error.message?.includes('email_address_in_use')
+      ) {
         errorMessage = `このメールアドレスは既に使用されています。\n\nデータの不整合がある場合は、管理ツールでクリーンアップしてください。`
       }
-      
+
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -119,7 +128,8 @@ export default function SignupPage() {
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-600">
-              {email} に確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。
+              {email}{' '}
+              に確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。
             </p>
           </CardContent>
           <CardFooter>
