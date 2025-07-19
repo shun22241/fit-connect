@@ -276,7 +276,7 @@ export default function WorkoutsPage() {
                           <div className="flex items-center gap-1">
                             <Target className="h-4 w-4" />
                             {workout.exercises.reduce(
-                              (total, exercise) => total + exercise.sets,
+                              (total: number, exercise: any) => total + exercise.sets,
                               0,
                             )}{' '}
                             セット

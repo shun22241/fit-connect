@@ -54,14 +54,15 @@ export default function WorkoutDetailPage() {
   }
 
   const totalSets = workout.exercises.reduce(
-    (sum, exercise) => sum + exercise.sets,
+    (sum: number, exercise: any) => sum + exercise.sets,
     0,
   )
-  const totalVolume = workout.exercises.reduce((sum, exercise) => {
+  const totalVolume = workout.exercises.reduce((sum: number, exercise: any) => {
     return (
       sum +
       exercise.weights.reduce(
-        (volSum, weight, i) => volSum + weight * exercise.reps[i],
+        (volSum: number, weight: number, i: number) =>
+          volSum + weight * exercise.reps[i],
         0,
       )
     )
@@ -200,9 +201,10 @@ export default function WorkoutDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {workout.exercises.map((exercise, index) => {
+              {workout.exercises.map((exercise: any, index: number) => {
                 const exerciseVolume = exercise.weights.reduce(
-                  (sum, weight, i) => sum + weight * exercise.reps[i],
+                  (sum: number, weight: number, i: number) =>
+                    sum + weight * exercise.reps[i],
                   0,
                 )
 
@@ -234,31 +236,35 @@ export default function WorkoutDetailPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {exercise.reps.map((rep, setIndex) => (
-                            <tr
-                              key={setIndex}
-                              className="border-b last:border-b-0"
-                            >
-                              <td className="py-2 px-3">
-                                <Badge variant="outline">
-                                  Set {setIndex + 1}
-                                </Badge>
-                              </td>
-                              <td className="py-2 px-3 text-center font-medium">
-                                {rep}
-                              </td>
-                              <td className="py-2 px-3 text-center font-medium">
-                                {exercise.weights[setIndex]}
-                              </td>
-                              <td className="py-2 px-3 text-center text-blue-600 font-medium">
-                                {(rep * exercise.weights[setIndex]).toFixed(1)}
-                                kg
-                              </td>
-                              <td className="py-2 px-3 text-center text-gray-600">
-                                {exercise.restSeconds[setIndex] || '-'}
-                              </td>
-                            </tr>
-                          ))}
+                          {exercise.reps.map(
+                            (rep: number, setIndex: number) => (
+                              <tr
+                                key={setIndex}
+                                className="border-b last:border-b-0"
+                              >
+                                <td className="py-2 px-3">
+                                  <Badge variant="outline">
+                                    Set {setIndex + 1}
+                                  </Badge>
+                                </td>
+                                <td className="py-2 px-3 text-center font-medium">
+                                  {rep}
+                                </td>
+                                <td className="py-2 px-3 text-center font-medium">
+                                  {exercise.weights[setIndex]}
+                                </td>
+                                <td className="py-2 px-3 text-center text-blue-600 font-medium">
+                                  {(rep * exercise.weights[setIndex]).toFixed(
+                                    1,
+                                  )}
+                                  kg
+                                </td>
+                                <td className="py-2 px-3 text-center text-gray-600">
+                                  {exercise.restSeconds[setIndex] || '-'}
+                                </td>
+                              </tr>
+                            ),
+                          )}
                         </tbody>
                       </table>
                     </div>
